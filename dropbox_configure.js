@@ -4,7 +4,7 @@ Template.configureLoginServiceDialogForDropbox.siteUrl = function () {
 
 Template.configureLoginServiceDialogForDropbox.fields = function () {
   return [
-    {property: 'appId',  label: 'App ID'},
+    {property: 'clientId',  label: 'App ID'},
     {property: 'secret', label: 'Secret'}
   ];
 };

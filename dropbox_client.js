@@ -12,18 +12,35 @@ DropboxOauth.requestCredential = function (options, callback) {
     options = {};
   }
 
-  var config = ServiceConfiguration.configurations.findOne({service: 'dropbox'});
+  var config = ServiceConfiguration.configurations.findOne({
+    service: 'dropbox'
+  });
   if (!config) {
     callback && callback(new ServiceConfiguration.ConfigError("Service not configured"));
     return;
   }
 
-  var state = Random.id();
+  var credentialToken = Random.secret();
+
+  var loginStyle = OAuth._loginStyle('dropbox', config, options);
 
   var loginUrl =
-      'https://www.dropbox.com/1/oauth2/authorize?' +
-      'client_id=' + config.clientId + '&response_type=code' + '&state=' + state +
-      '&redirect_uri=' + encodeURIComponent(Meteor.absoluteUrl('_oauth/dropbox?close'));
+    'https://www.dropbox.com/1/oauth2/authorize' +
+    '?response_type=code' +
+    '&client_id=' + config.clientId +
+    '&redirect_uri=' + OAuth._redirectUri('dropbox', config, {}, {
+      secure: true
+    }) +
+    '&state=' + OAuth._stateParam(loginStyle, credentialToken);
 
-  OAuth.initiateLogin(state, loginUrl, callback, {width: 875, height: 400});
+  OAuth.launchLogin({
+    loginService: "dropbox",
+    loginStyle: loginStyle,
+    loginUrl: loginUrl,
+    credentialRequestCompleteCallback: callback,
+    credentialToken: credentialToken,
+    popupOptions: {
+      height: 600
+    }
+  });
 };
